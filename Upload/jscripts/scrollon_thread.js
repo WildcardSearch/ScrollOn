@@ -1,5 +1,5 @@
 /**
- * Plugin Name: ScrollOn for MyBB 1.6.x
+ * Plugin Name: ScrollOn for MyBB 1.8.x
  * Copyright 2014 WildcardSearch
  * http://www.rantcentralforums.com
  *
@@ -49,29 +49,27 @@ var threadScroller = (function() {
 		}
 
 		// remove pagination
-		$$('div.pagination').each(function(e) {
-			e.remove();
+		$('div.pagination').each(function() {
+			this.remove();
 		});
 
 		// set up the elements
-		container = $('scrollon');
-		noPosts = $('scrollon_no_posts');
-		spinner = $('scrollon_spinner');
+		container = $('#scrollon');
+		noPosts = $('#scrollon_no_posts');
+		spinner = $('#scrollon_spinner');
 		container.show();
 
 		if ($('scrollon_show_link')) {
-			showLink = $('scrollon_show_link');
+			showLink = $('#scrollon_show_link');
 		}
 
-		qrLastPid = getFormInput('quick_reply_form', 'lastpid');
-
-		if ($('lastpid')) {
-			qrLastPid = $('lastpid');
+		if ($('#lastpid')) {
+			qrLastPid = $('#lastpid');
 		} else {
 			qrLastPid = getFormInput('quick_reply_form', 'lastpid');
 		}
 
-		if (qrLastPid.next('input') && qrLastPid.next('input').getAttribute('name') === 'from_page') {
+		if (qrLastPid.next('input') && qrLastPid.next('input').prop('name') === 'from_page') {
 			qrFromPage = qrLastPid.next('input');
 		} else {
 			qrFromPage = getFormInput('quick_reply_form', 'from_page');
@@ -80,7 +78,7 @@ var threadScroller = (function() {
 		// default mode
 		if (options.auto === false) {
 			if (typeof showLink !== 'undefined') {
-				Event.observe(showLink, 'click', checkForPosts);
+				showLink.click(checkForPosts);
 			}
 			return;
 		}
@@ -89,9 +87,13 @@ var threadScroller = (function() {
 		if (typeof showLink !== 'undefined') {
 			showLink.remove();
 		}
-		showLink = container.down('span');
-		showLink.update(lang.showMore);
+		showLink = container.children('span:first');
+		showLink.html(lang.showMore);
 		startAuto();
+		
+		if (elementInView()) {
+			showLink.hide();
+		}
 	}
 
 	/**
@@ -102,7 +104,7 @@ var threadScroller = (function() {
 	 * @return: n/a
 	 */
 	function startAuto() {
-		Event.observe(window, 'scroll', checkScroll);
+		$(window).scroll(checkScroll);
 	}
 
 	/**
@@ -113,7 +115,7 @@ var threadScroller = (function() {
 	 * @return: n/a
 	 */
 	function stopAuto() {
-		Event.stopObserving(window, 'scroll', checkScroll);
+		$(window).unbind('scroll', checkScroll);
 	}
 
 	/**
@@ -121,10 +123,11 @@ var threadScroller = (function() {
 	 *
 	 * in auto mode, if the EOT marker is in view, check for posts
 	 *
-	 * @param - event - (Event) the scroll event
+	 * @param - Event the scroll event
 	 * @return: n/a
 	 */
-	function checkScroll(event) {
+	function checkScroll(e) {
+		e.preventDefault();
 		stopAuto();
 		if (elementInView()) {
 			checkForPosts();
@@ -141,7 +144,7 @@ var threadScroller = (function() {
 	 * @return: n/a
 	 */
 	function startLive() {
-		Event.observe(window, 'scroll', checkScrollUpdater);
+		$(window).scroll(checkScrollUpdater);
 	}
 
 	/**
@@ -152,7 +155,7 @@ var threadScroller = (function() {
 	 * @return: n/a
 	 */
 	function stopLive() {
-		Event.stopObserving(window, 'scroll', checkScrollUpdater);
+		$(window).unbind('scroll', checkScrollUpdater);
 	}
 
 	/**
@@ -160,10 +163,10 @@ var threadScroller = (function() {
 	 *
 	 * in live mode, only update when the user is at EOT
 	 *
-	 * @param - event - (Event) the scroll event
+	 * @param - Event the scroll event
 	 * @return: n/a
 	 */
-	function checkScrollUpdater(event) {
+	function checkScrollUpdater(e) {
 		stopLive();
 		if (elementInView()) {
 			startLiveTimer();
@@ -182,7 +185,7 @@ var threadScroller = (function() {
 	 */
 	function startLiveTimer() {
 		stopLiveTimer();
-		timer = checkForPosts.delay(parseInt(refreshRate));
+		timer = setTimeout(checkForPosts, parseInt(refreshRate) * 1000);
 	}
 
 	/**
@@ -208,42 +211,41 @@ var threadScroller = (function() {
 	 * @param - event - (Event) the (possibly non-existent) click event
 	 * @return: n/a
 	 */
-	function checkForPosts(event) {
+	function checkForPosts(e) {
 		// sometimes we call this directly so there is no event in progress
-		if (typeof event !== 'undefined') {
-			Event.stop(event);
+		if (typeof e !== 'undefined') {
+			e.preventDefault();
 		}
 
 		stopLiveTimer();
 		spinner.show();
 
-		new Ajax.Request('xmlhttp.php', {
-			parameters: {
+		$.ajax({
+			type: 'post',
+			url: 'xmlhttp.php',
+			data: {
 				action: 'scrollon',
 				tid: options.tid,
 				fid: options.fid,
 				lastPostDate: options.lastPostDate,
 				postCounter: options.postCounter
 			},
-			onSuccess: loadPosts
+			success: loadPosts,
 		});
 	}
 
 	/**
-	 * loadPosts()
-	 *
 	 * handles the server response and either inserts the newly loaded
 	 * posts, or flags the threads as ended (EOT)
 	 *
 	 * @param - transport - (Object) the response object
 	 * @return: n/a
 	 */
-	function loadPosts(transport) {
-		var info = transport.responseJSON,
-		pidArray, postCount, fromPage, lastPid;
+	function loadPosts(data) {
+		var pidArray, postCount, fromPage, lastPid;
 
 		// null means there were no new threads
-		if (info === null) {
+		if (!data) {
 			// flag the EOT and then increase the rate according to the delay
 			endOfThread();
 			refreshRate = refreshRate * options.liveDecay;
@@ -251,21 +253,21 @@ var threadScroller = (function() {
 			// if we found posts, reset the rate to the initial value
 			refreshRate = options.liveRate;
 
-			pidArray = info.pids.split(',');
+			pidArray = data.pids.split(',');
 			postCount = pidArray.length;
 
-			options.lastPostDate = info.lastPostDate;
-			options.postCounter = info.postCounter;
+			options.lastPostDate = data.lastPostDate;
+			options.postCounter = data.postCounter;
 
 			// figure out which page this puts us on
-			fromPage = parseInt(info.postCounter / options.defaultPostsPer);
-			if (info.postCounter % options.defaultPostsPer == 0) {
+			fromPage = parseInt(data.postCounter / options.defaultPostsPer);
+			if (data.postCounter % options.defaultPostsPer == 0) {
 				fromPage += 1;
 			}
 			qrFromPage.value = fromPage;
 
 			// insert the posts
-			$('posts').insert(info.posts);
+			$('#posts').append(data.posts);
 
 			// if we got a 'page full'
 			if (postCount == options.postsPer) {
@@ -315,8 +317,8 @@ var threadScroller = (function() {
 	 * @return: n/a
 	 */
 	function setup(adminOptions, language) {
-		Object.extend(options, adminOptions || {});
-		Object.extend(lang, language || {});
+		$.extend(options, adminOptions || {});
+		$.extend(lang, language || {});
 	}
 
 	/**
@@ -341,7 +343,7 @@ var threadScroller = (function() {
 			return false;
 		}
 
-		if (!$('scrollon') || !$('scrollon_no_posts') || !$('scrollon_spinner')) {
+		if (!$('#scrollon') || !$('#scrollon_no_posts') || !$('#scrollon_spinner')) {
 			return false;
 		}
 		return true;
@@ -356,9 +358,13 @@ var threadScroller = (function() {
 	 * @return: on success, the element (Object), on fail (Boolean) false
 	 */
 	function getScriptByFileName(fileName) {
-		return $$('script').find(function(script) {
-			return (script.src && script.src.indexOf(fileName) != -1);
+		var returnElement = false;
+		$('script').each(function(k, el) {
+			if (el.src && el.src.indexOf(fileName) != -1) {
+				returnElement = el;
+			}
 		});
+		return returnElement;
 	}
 
 	/**
@@ -421,7 +427,7 @@ var threadScroller = (function() {
 	 * @return: n/a
 	 */
 	function elementInView() {
-		return  ((container.viewportOffset()[1] + container.offsetHeight) < DomLib.getPageSize()[3]);
+		return  ((container.get(0).getBoundingClientRect().top + container.get(0).offsetHeight) < getPageSize()[3]);
 	}
 
 	/**
@@ -432,8 +438,8 @@ var threadScroller = (function() {
 	 * @return: n/a
 	 */
 	function scrollToPost(pid) {
-		if ($('post_' + pid)) {
-			$('post_' + pid).scrollTo();
+		if ($('#post_' + pid)) {
+			$('#post_' + pid).get(0).scrollIntoView();
 		}
 	}
 
@@ -447,12 +453,79 @@ var threadScroller = (function() {
 	 * @return: on success the HTMLInputElement Object on fail an empty object
 	 */
 	function getFormInput(form, name) {
-		return $$('#' + form + ' input').find(function(input) {
-			return (input && input.getAttribute('name') === name);
+		var retInput;
+
+		$('#' + form + ' input').each(function(k, input) {
+			if (input && input.getAttribute('name') === name) {
+				retInput = input;
+				return;
+			}
 		});
+		
+		return $(retInput);
 	}
 
-	// now build the object with only the public methods and properties ;)
+	/*
+	 * This function is from quirksmode.org
+	 * Modified for use in MyBB
+	 * Removed in 1.8
+	 * ...and now added back for this plugin
+	 */
+	function getPageSize() {
+		var xScroll, 
+			yScroll;
+
+		if (window.innerHeight && window.scrollMaxY) {
+			xScroll = document.body.scrollWidth;
+			yScroll = window.innerHeight + window.scrollMaxY;
+		// All but Explorer Mac
+		} else if (document.body.scrollHeight > document.body.offsetHeight) {
+			xScroll = document.body.scrollWidth;
+			yScroll = document.body.scrollHeight;
+		// Explorer Mac...would also work in Explorer 6 Strict, Mozilla and Safari
+		} else {
+			xScroll = document.body.offsetWidth;
+			yScroll = document.body.offsetHeight;
+		}
+
+		var windowWidth, windowHeight;
+		// all except Explorer
+		if (self.innerHeight) {
+			windowWidth = self.innerWidth;
+			windowHeight = self.innerHeight;
+		// Explorer 6 Strict Mode
+		} else if (document.documentElement &&
+				   document.documentElement.clientHeight) {
+			windowWidth = document.documentElement.clientWidth;
+			windowHeight = document.documentElement.clientHeight;
+		// other Explorers
+		} else if (document.body) {
+			windowWidth = document.body.clientWidth;
+			windowHeight = document.body.clientHeight;
+		}
+
+		var pageHeight, pageWidth;
+
+		// For small pages with total height less then height of the viewport
+		if (yScroll < windowHeight) {
+			pageHeight = windowHeight;
+		} else {
+			pageHeight = yScroll;
+		}
+
+		// For small pages with total width less then width of the viewport
+		if (xScroll < windowWidth) {
+			pageWidth = windowWidth;
+		} else {
+			pageWidth = xScroll;
+		}
+		
+		var arrayPageSize = new Array(pageWidth, pageHeight, windowWidth, windowHeight);
+
+		return arrayPageSize;
+	}
+
+	// now build the object with only the public methods and properties
 	return {
 		version: version,
 		versionCode: versionCode,
@@ -461,4 +534,4 @@ var threadScroller = (function() {
 		setup: setup
 	};
 })();
-Event.observe(window, 'load', threadScroller.init);
+$(document).ready(threadScroller.init);
