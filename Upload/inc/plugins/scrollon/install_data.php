@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: ScrollOn for MyBB 1.6.x
+ * Plugin Name: ScrollOn for MyBB 1.8.x
  * Copyright 2014 WildcardSearch
  * http://www.rantcentralforums.com
  *

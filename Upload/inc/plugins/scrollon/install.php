@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: ScrollOn for MyBB 1.6.x
+ * Plugin Name: ScrollOn for MyBB 1.8.x
  * Copyright 2014 WildcardSearch
  * http://www.rantcentralforums.com
  *
@@ -78,8 +78,8 @@ EOF;
 		"website" => 'https://github.com/WildcardSearch/ScrollOn',
 		"author" => $author,
 		"authorsite" => 'http://www.rantcentralforums.com',
-		"version" => '0.1',
-		"compatibility" => '16*',
+		"version" => '0.2',
+		"compatibility" => '18*',
 		"guid" => '',
 	);
 }

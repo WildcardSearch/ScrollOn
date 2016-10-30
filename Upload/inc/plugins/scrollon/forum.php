@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: ScrollOn for MyBB 1.6.x
+ * Plugin Name: ScrollOn for MyBB 1.8.x
  * Copyright 2014 WildcardSearch
  * http://www.rantcentralforums.com
  *
@@ -102,8 +102,6 @@ function scrollon_showthread_end()
 
 	// set up the client-side
 	$headerinclude .= <<<EOF
-	<link rel="stylesheet" type="text/css" href="jscripts/debug.css" media="screen"/>
-	<script type="text/javascript" src="jscripts/debug.js"></script>
 	<script type="text/javascript" src="jscripts/scrollon_thread.js?version=100"></script>
 	<script type="text/javascript">
 	<!--
