@@ -40,11 +40,10 @@ function scrollon_info()
 	</li>
 </ul>
 EOF;
-	}
 
-	$button_pic = $mybb->settings['bburl'] . '/inc/plugins/scrollon/images/donate.gif';
-	$border_pic = $mybb->settings['bburl'] . '/inc/plugins/scrollon/images/pixel.gif';
-	$scrollon_description = <<<EOF
+		$button_pic = $mybb->settings['bburl'] . '/inc/plugins/scrollon/images/donate.gif';
+		$border_pic = $mybb->settings['bburl'] . '/inc/plugins/scrollon/images/pixel.gif';
+		$scrollon_description = <<<EOF
 <table width="100%">
 	<tbody>
 		<tr>
@@ -63,6 +62,9 @@ EOF;
 	</tbody>
 </table>
 EOF;
+	} else {
+		$scrollon_description = $lang->scrollon_description;
+	}
 
 	$name = <<<EOF
 <span style="font-familiy: arial; font-size: 1.5em; color: #4AABFF; text-shadow: 2px 2px 2px #4AABFF;">{$lang->scrollon}</span>
