@@ -78,7 +78,7 @@ EOF;
 		"website" => 'https://github.com/WildcardSearch/ScrollOn',
 		"author" => $author,
 		"authorsite" => 'http://www.rantcentralforums.com',
-		"version" => '0.2',
+		"version" => '0.0.3',
 		"compatibility" => '18*',
 		"guid" => '',
 	);

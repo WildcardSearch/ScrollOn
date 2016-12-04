@@ -1,4 +1,4 @@
-## ScrollOn 0.2 BETA
+## ScrollOn 0.0.3 BETA
 For MyBB 1.8.x
 
 a plugin for MyBB forum that adds AJAX power to the thread view
