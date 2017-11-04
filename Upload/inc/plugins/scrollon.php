@@ -32,7 +32,7 @@ else
  * @param string the name of the class to load
  */
 function scrollOnClassAutoLoad($className) {
-	$path = MYBB_ROOT . "inc/plugins/MentionMe/classes/{$className}.php";
+	$path = MYBB_ROOT . "inc/plugins/scrollon/classes/{$className}.php";
 
 	if (file_exists($path)) {
 		require_once $path;

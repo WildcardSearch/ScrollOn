@@ -114,8 +114,7 @@ function scrollon_install()
 		$lang->load('scrollon');
 	}
 
-	$installer = new WildcardPluginInstaller(MYBB_ROOT . 'inc/plugins/scrollon/install_data.php');
-	$installer->install();
+	ScrollOnInstaller::getInstance()->install();
 }
 
 /*
@@ -141,8 +140,7 @@ function scrollon_activate()
 			$lang->load('scrollon');
 		}
 
-		$installer = new WildcardPluginInstaller(MYBB_ROOT . 'inc/plugins/scrollon/install_data.php');
-		$installer->install();
+		ScrollOnInstaller::getInstance()->install();
 	}
 	scrollon_set_cache_version();
 }
@@ -169,8 +167,7 @@ function scrollon_deactivate()
  */
 function scrollon_uninstall()
 {
-	$installer = new WildcardPluginInstaller(MYBB_ROOT . 'inc/plugins/scrollon/install_data.php');
-	$installer->uninstall();
+	ScrollOnInstaller::getInstance()->uninstall();
 
 	// delete our cached version
 	scrollon_unset_cache_version();
