@@ -8,8 +8,7 @@
  */
 
 // disallow direct access to this file for security reasons
-if(!defined("IN_MYBB"))
-{
+if (!defined("IN_MYBB")) {
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
@@ -24,15 +23,13 @@ function scrollon_info()
 {
 	global $mybb, $lang, $cp_style;
 
-	if(!$lang->scrollon)
-	{
+	if (!$lang->scrollon) {
 		$lang->load('scrollon');
 	}
 
 	$extra_links = "<br />";
 	$settings_link = scrollon_build_settings_link();
-	if($settings_link)
-	{
+	if ($settings_link) {
 		$extra_links = <<<EOF
 <ul>
 	<li style="list-style-image: url(styles/{$cp_style}/images/scrollon/settings.gif)">
@@ -109,8 +106,7 @@ function scrollon_install()
 {
 	global $lang;
 
-	if(!$lang->scrollon)
-	{
+	if (!$lang->scrollon) {
 		$lang->load('scrollon');
 	}
 
@@ -132,11 +128,9 @@ function scrollon_activate()
 	// if we just upgraded . . .
 	$old_version = scrollon_get_cache_version();
 	$info = scrollon_info();
-	if(version_compare($old_version, $info['version'], '<'))
-	{
+	if (version_compare($old_version, $info['version'], '<')) {
 		global $lang;
-		if(!$lang->scrollon)
-		{
+		if (!$lang->scrollon) {
 			$lang->load('scrollon');
 		}
 
@@ -190,13 +184,10 @@ function scrollon_get_settingsgroup()
 	static $scrollon_settings_gid;
 
 	// if we have already stored the value
-	if(isset($scrollon_settings_gid))
-	{
+	if (isset($scrollon_settings_gid)) {
 		// don't waste a query
 		$gid = (int) $scrollon_settings_gid;
-	}
-	else
-	{
+	} else {
 		global $db;
 
 		// otherwise we will have to query the db
@@ -216,8 +207,7 @@ function scrollon_get_settingsgroup()
  */
 function scrollon_build_settings_url($gid)
 {
-	if($gid)
-	{
+	if ($gid) {
 		return "index.php?module=config-settings&amp;action=change&amp;gid=" . $gid;
 	}
 }
@@ -233,22 +223,19 @@ function scrollon_build_settings_link()
 {
 	global $lang;
 
-	if(!$lang->scrollon)
-	{
+	if (!$lang->scrollon) {
 		$lang->load('scrollon');
 	}
 
 	$gid = scrollon_get_settingsgroup();
 
 	// does the group exist?
-	if($gid)
-	{
+	if ($gid) {
 		// if so build the URL
 		$url = scrollon_build_settings_url($gid);
 
 		// did we get a URL?
-		if($url)
-		{
+		if ($url) {
 			// if so build the link
 			return "<a href=\"{$url}\" title=\"{$lang->scrollon_plugin_settings}\">{$lang->scrollon_plugin_settings}</a>";
 		}
@@ -272,8 +259,7 @@ function scrollon_get_cache_version()
 
 	// get currently installed version, if there is one
 	$scrollon = $cache->read('scrollon');
-	if($scrollon['version'])
-	{
+	if ($scrollon['version']) {
         return $scrollon['version'];
 	}
     return 0;
