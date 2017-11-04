@@ -22,7 +22,7 @@ if(!defined("IN_MYBB"))
  */
 function scrollon_info()
 {
-	global $mybb, $lang;
+	global $mybb, $lang, $cp_style;
 
 	if(!$lang->scrollon)
 	{
@@ -35,14 +35,14 @@ function scrollon_info()
 	{
 		$extra_links = <<<EOF
 <ul>
-	<li style="list-style-image: url(../inc/plugins/scrollon/images/settings.gif)">
+	<li style="list-style-image: url(styles/{$cp_style}/images/scrollon/settings.gif)">
 		{$settings_link}
 	</li>
 </ul>
 EOF;
 
-		$button_pic = $mybb->settings['bburl'] . '/inc/plugins/scrollon/images/donate.gif';
-		$border_pic = $mybb->settings['bburl'] . '/inc/plugins/scrollon/images/pixel.gif';
+		$button_pic = "styles/{$cp_style}/images/scrollon/donate.gif";
+		$border_pic = "styles/{$cp_style}/images/scrollon/pixel.gif";
 		$scrollon_description = <<<EOF
 <table width="100%">
 	<tbody>
