@@ -13,6 +13,9 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
+// register custom class autoloader
+spl_autoload_register('scrollOnClassAutoLoad');
+
 // load the install/admin routines only if in ACP.
 if(defined("IN_ADMINCP"))
 {
@@ -21,6 +24,19 @@ if(defined("IN_ADMINCP"))
 else
 {
 	require_once MYBB_ROOT . "inc/plugins/scrollon/forum.php";
+}
+
+/**
+ * class autoloader
+ *
+ * @param string the name of the class to load
+ */
+function scrollOnClassAutoLoad($className) {
+	$path = MYBB_ROOT . "inc/plugins/MentionMe/classes/{$className}.php";
+
+	if (file_exists($path)) {
+		require_once $path;
+	}
 }
 
 ?>
