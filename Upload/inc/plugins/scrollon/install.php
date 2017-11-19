@@ -8,8 +8,7 @@
  */
 
 // disallow direct access to this file for security reasons
-if(!defined("IN_MYBB"))
-{
+if (!defined("IN_MYBB")) {
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
@@ -22,29 +21,26 @@ if(!defined("IN_MYBB"))
  */
 function scrollon_info()
 {
-	global $mybb, $lang;
+	global $mybb, $lang, $cp_style;
 
-	if(!$lang->scrollon)
-	{
+	if (!$lang->scrollon) {
 		$lang->load('scrollon');
 	}
 
 	$extra_links = "<br />";
 	$settings_link = scrollon_build_settings_link();
-	if($settings_link)
-	{
+	if ($settings_link) {
 		$extra_links = <<<EOF
 <ul>
-	<li style="list-style-image: url(../inc/plugins/scrollon/images/settings.gif)">
+	<li style="list-style-image: url(styles/{$cp_style}/images/scrollon/settings.gif)">
 		{$settings_link}
 	</li>
 </ul>
 EOF;
-	}
 
-	$button_pic = $mybb->settings['bburl'] . '/inc/plugins/scrollon/images/donate.gif';
-	$border_pic = $mybb->settings['bburl'] . '/inc/plugins/scrollon/images/pixel.gif';
-	$scrollon_description = <<<EOF
+		$button_pic = "styles/{$cp_style}/images/scrollon/donate.gif";
+		$border_pic = "styles/{$cp_style}/images/scrollon/pixel.gif";
+		$scrollon_description = <<<EOF
 <table width="100%">
 	<tbody>
 		<tr>
@@ -63,6 +59,9 @@ EOF;
 	</tbody>
 </table>
 EOF;
+	} else {
+		$scrollon_description = $lang->scrollon_description;
+	}
 
 	$name = <<<EOF
 <span style="font-familiy: arial; font-size: 1.5em; color: #4AABFF; text-shadow: 2px 2px 2px #4AABFF;">{$lang->scrollon}</span>
@@ -78,7 +77,7 @@ EOF;
 		"website" => 'https://github.com/WildcardSearch/ScrollOn',
 		"author" => $author,
 		"authorsite" => 'http://www.rantcentralforums.com',
-		"version" => '0.2',
+		"version" => '0.0.3',
 		"compatibility" => '18*',
 		"guid" => '',
 	);
@@ -107,18 +106,11 @@ function scrollon_install()
 {
 	global $lang;
 
-	if(!$lang->scrollon)
-	{
+	if (!$lang->scrollon) {
 		$lang->load('scrollon');
 	}
 
-	// settings tables, templates, groups and setting groups
-	if(!class_exists('WildcardPluginInstaller'))
-	{
-		require_once MYBB_ROOT . 'inc/plugins/scrollon/classes/installer.php';
-	}
-	$installer = new WildcardPluginInstaller(MYBB_ROOT . 'inc/plugins/scrollon/install_data.php');
-	$installer->install();
+	ScrollOnInstaller::getInstance()->install();
 }
 
 /*
@@ -136,20 +128,13 @@ function scrollon_activate()
 	// if we just upgraded . . .
 	$old_version = scrollon_get_cache_version();
 	$info = scrollon_info();
-	if(version_compare($old_version, $info['version'], '<'))
-	{
+	if (version_compare($old_version, $info['version'], '<')) {
 		global $lang;
-		if(!$lang->scrollon)
-		{
+		if (!$lang->scrollon) {
 			$lang->load('scrollon');
 		}
 
-		if(!class_exists('WildcardPluginInstaller'))
-        {
-            require_once MYBB_ROOT . 'inc/plugins/scrollon/classes/installer.php';
-        }
-        $installer = new WildcardPluginInstaller(MYBB_ROOT . 'inc/plugins/scrollon/install_data.php');
-		$installer->install();
+		ScrollOnInstaller::getInstance()->install();
 	}
 	scrollon_set_cache_version();
 }
@@ -176,12 +161,7 @@ function scrollon_deactivate()
  */
 function scrollon_uninstall()
 {
-	if(!class_exists('WildcardPluginInstaller'))
-	{
-		require_once MYBB_ROOT . 'inc/plugins/scrollon/classes/installer.php';
-	}
-	$installer = new WildcardPluginInstaller(MYBB_ROOT . 'inc/plugins/scrollon/install_data.php');
-	$installer->uninstall();
+	ScrollOnInstaller::getInstance()->uninstall();
 
 	// delete our cached version
 	scrollon_unset_cache_version();
@@ -204,13 +184,10 @@ function scrollon_get_settingsgroup()
 	static $scrollon_settings_gid;
 
 	// if we have already stored the value
-	if(isset($scrollon_settings_gid))
-	{
+	if (isset($scrollon_settings_gid)) {
 		// don't waste a query
 		$gid = (int) $scrollon_settings_gid;
-	}
-	else
-	{
+	} else {
 		global $db;
 
 		// otherwise we will have to query the db
@@ -230,8 +207,7 @@ function scrollon_get_settingsgroup()
  */
 function scrollon_build_settings_url($gid)
 {
-	if($gid)
-	{
+	if ($gid) {
 		return "index.php?module=config-settings&amp;action=change&amp;gid=" . $gid;
 	}
 }
@@ -247,22 +223,19 @@ function scrollon_build_settings_link()
 {
 	global $lang;
 
-	if(!$lang->scrollon)
-	{
+	if (!$lang->scrollon) {
 		$lang->load('scrollon');
 	}
 
 	$gid = scrollon_get_settingsgroup();
 
 	// does the group exist?
-	if($gid)
-	{
+	if ($gid) {
 		// if so build the URL
 		$url = scrollon_build_settings_url($gid);
 
 		// did we get a URL?
-		if($url)
-		{
+		if ($url) {
 			// if so build the link
 			return "<a href=\"{$url}\" title=\"{$lang->scrollon_plugin_settings}\">{$lang->scrollon_plugin_settings}</a>";
 		}
@@ -286,8 +259,7 @@ function scrollon_get_cache_version()
 
 	// get currently installed version, if there is one
 	$scrollon = $cache->read('scrollon');
-	if($scrollon['version'])
-	{
+	if ($scrollon['version']) {
         return $scrollon['version'];
 	}
     return 0;
