@@ -7,11 +7,7 @@
  */
 
 var threadScroller = (function($) {
-	var version = '1.0.0',
-	versionCode = 100,
-
-	// elements
-	container = {},
+	var container = {},
 	noPosts = {},
 	spinner = {},
 	showLink,
@@ -30,7 +26,6 @@ var threadScroller = (function($) {
 	lang = {
 		showMore: 'Show More Posts'
 	},
-	parameters = {},
 
 	timer = null,
 	refreshRate = 30,
@@ -313,85 +308,12 @@ var threadScroller = (function($) {
 			}
 		}
 
-		loadParams();
-		if (typeof parameters.version != 'undefined' && parameters.version != versionCode) {
-			return false;
-		}
-
 		if (!$('#scrollon') ||
 			!$('#scrollon_no_posts') ||
 			!$('#scrollon_spinner')) {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * retrieve a HTMLScriptElement by its src attribute's base filename
-	 *
-	 * @param String the unqualified script file name
-	 * @return mixed on success, Object the element,
-					 on fail (Boolean) false
-	 */
-	function getScriptByFileName(fileName) {
-		var returnElement = false;
-		$('script').each(function(k, el) {
-			if (el.src && el.src.indexOf(fileName) != -1) {
-				returnElement = el;
-			}
-		});
-		return returnElement;
-	}
-
-	/**
-	 * get the script parameters as passed in the tag src
-	 *
-	 * @return void
-	 */
-	function loadParams() {
-		var paramParts, params, param, p,
-		script = getScriptByFileName('scrollon_thread.js');
-
-		// can't find our script
-		if (!script ||
-			!script.src) {
-			return;
-		}
-
-		// split the src into pieces
-		params = script.src.split('/');
-		if (params.length < 1) {
-			// should never happen as browsers tend to autofill http://blah to
-			// unqualified src attributes
-			return;
-		}
-
-		// split the filename on the ? if any
-		params = params[params.length - 1];
-		params = params.split('?');
-		if (params.length < 2) {
-			// only one piece means only a filename and no parameters
-			return;
-		}
-
-		// now discard the filename portion but keep the variable list (if any)
-		params = params[1];
-		params = params.split('&');
-		if (params.length === 0) {
-			// idk
-			return;
-		}
-
-		// now get the params and values
-		for (p = 0; p < params.length; p++) {
-			param = params[p];
-			paramParts = param.split('=');
-			if (paramParts.length < 2) {
-				// no value
-				continue;
-			}
-			parameters[paramParts[0]] = paramParts[1];
-		}
 	}
 
 	/**
@@ -502,9 +424,6 @@ var threadScroller = (function($) {
 
 	// now build the object with only the public methods and properties
 	return {
-		version: version,
-		versionCode: versionCode,
-
 		init: init,
 		setup: setup
 	};
