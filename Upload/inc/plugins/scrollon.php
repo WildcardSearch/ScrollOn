@@ -12,6 +12,7 @@ if (!defined("IN_MYBB")) {
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
+define('SCROLLON_VERSION', '0.0.3');
 define('SCROLLON_VERSION_CODE', '000003');
 
 // register custom class autoloader
