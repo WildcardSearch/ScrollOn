@@ -48,6 +48,9 @@ function scrollon_showthread_end()
 	}
 	$dateline = (int) $db->fetch_field($query, 'dateline');
 
+	// set version code
+	$version = SCROLLON_VERSION_CODE;
+
 	// get the posts per page setting from somewhere
 	$ppp = 20;
 	$default_ppp = (int) $mybb->settings['postsperpage'];
@@ -91,7 +94,7 @@ function scrollon_showthread_end()
 
 	// set up the client-side
 	$headerinclude .= <<<EOF
-	<script type="text/javascript" src="jscripts/scrollon/thread.js?version=100"></script>
+	<script type="text/javascript" src="jscripts/scrollon/thread.js?version={$version}"></script>
 	<script type="text/javascript">
 	<!--
 		threadScroller.setup({
