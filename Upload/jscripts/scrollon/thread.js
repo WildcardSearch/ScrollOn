@@ -325,7 +325,7 @@ var threadScroller = (function($) {
 	 */
 	function elementInView() {
 		return ((container.get(0).getBoundingClientRect().top +
-				container.get(0).offsetHeight) < getPageSize()[3]);
+				container.get(0).offsetHeight) < $(window).height());
 	}
 
 	/**
@@ -357,67 +357,6 @@ var threadScroller = (function($) {
 		});
 
 		return $(retInput);
-	}
-
-	/*
-	 * This function is from quirksmode.org
-	 * Modified for use in MyBB
-	 * Removed in 1.8
-	 * ...and now added back for this plugin
-	 */
-	function getPageSize() {
-		var xScroll,
-			yScroll;
-
-		if (window.innerHeight &&
-			window.scrollMaxY) {
-			xScroll = document.body.scrollWidth;
-			yScroll = window.innerHeight + window.scrollMaxY;
-		// All but Explorer Mac
-		} else if (document.body.scrollHeight > document.body.offsetHeight) {
-			xScroll = document.body.scrollWidth;
-			yScroll = document.body.scrollHeight;
-		// Explorer Mac...would also work in Explorer 6 Strict, Mozilla and Safari
-		} else {
-			xScroll = document.body.offsetWidth;
-			yScroll = document.body.offsetHeight;
-		}
-
-		var windowWidth, windowHeight;
-		// all except Explorer
-		if (self.innerHeight) {
-			windowWidth = self.innerWidth;
-			windowHeight = self.innerHeight;
-		// Explorer 6 Strict Mode
-		} else if (document.documentElement &&
-				   document.documentElement.clientHeight) {
-			windowWidth = document.documentElement.clientWidth;
-			windowHeight = document.documentElement.clientHeight;
-		// other Explorers
-		} else if (document.body) {
-			windowWidth = document.body.clientWidth;
-			windowHeight = document.body.clientHeight;
-		}
-
-		var pageHeight, pageWidth;
-
-		// For small pages with total height less then height of the viewport
-		if (yScroll < windowHeight) {
-			pageHeight = windowHeight;
-		} else {
-			pageHeight = yScroll;
-		}
-
-		// For small pages with total width less then width of the viewport
-		if (xScroll < windowWidth) {
-			pageWidth = windowWidth;
-		} else {
-			pageWidth = xScroll;
-		}
-
-		var arrayPageSize = new Array(pageWidth, pageHeight, windowWidth, windowHeight);
-
-		return arrayPageSize;
 	}
 
 	$(init);
