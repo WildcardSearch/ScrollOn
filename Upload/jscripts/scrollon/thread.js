@@ -6,7 +6,7 @@
  * this object powers the thread view
  */
 
-var threadScroller = (function() {
+var threadScroller = (function($) {
 	var version = '1.0.0',
 	versionCode = 100,
 
@@ -37,11 +37,9 @@ var threadScroller = (function() {
 	lastPid = 0;
 
 	/**
-	 * init()
-	 *
 	 * set up the object on window load
 	 *
-	 * @return: n/a
+	 * @return void
 	 */
 	function init() {
 		if (!checkRequired()) {
@@ -69,7 +67,8 @@ var threadScroller = (function() {
 			qrLastPid = getFormInput('quick_reply_form', 'lastpid');
 		}
 
-		if (qrLastPid.next('input') && qrLastPid.next('input').prop('name') === 'from_page') {
+		if (qrLastPid.next('input') &&
+			qrLastPid.next('input').prop('name') === 'from_page') {
 			qrFromPage = qrLastPid.next('input');
 		} else {
 			qrFromPage = getFormInput('quick_reply_form', 'from_page');
@@ -90,41 +89,35 @@ var threadScroller = (function() {
 		showLink = container.children('span:first');
 		showLink.html(lang.showMore);
 		startAuto();
-		
+
 		if (elementInView()) {
 			showLink.hide();
 		}
 	}
 
 	/**
-	 * startAuto()
-	 *
 	 * initiate the observance of mouse scroll for auto mode
 	 *
-	 * @return: n/a
+	 * @return void
 	 */
 	function startAuto() {
 		$(window).scroll(checkScroll);
 	}
 
 	/**
-	 * stopAuto()
-	 *
 	 * stop observing of mouse scroll for auto mode
 	 *
-	 * @return: n/a
+	 * @return void
 	 */
 	function stopAuto() {
 		$(window).unbind('scroll', checkScroll);
 	}
 
 	/**
-	 * checkScroll()
-	 *
 	 * in auto mode, if the EOT marker is in view, check for posts
 	 *
-	 * @param - Event the scroll event
-	 * @return: n/a
+	 * @param  Event the scroll event
+	 * @return void
 	 */
 	function checkScroll(e) {
 		e.preventDefault();
@@ -137,34 +130,28 @@ var threadScroller = (function() {
 	}
 
 	/**
-	 * startLive()
-	 *
 	 * start observing of mouse scroll for live mode
 	 *
-	 * @return: n/a
+	 * @return void
 	 */
 	function startLive() {
 		$(window).scroll(checkScrollUpdater);
 	}
 
 	/**
-	 * stopLive()
-	 *
 	 * stop observing of mouse scroll for live mode
 	 *
-	 * @return: n/a
+	 * @return void
 	 */
 	function stopLive() {
 		$(window).unbind('scroll', checkScrollUpdater);
 	}
 
 	/**
-	 * checkScrollUpdater()
-	 *
 	 * in live mode, only update when the user is at EOT
 	 *
-	 * @param - Event the scroll event
-	 * @return: n/a
+	 * @param  Event the scroll event
+	 * @return void
 	 */
 	function checkScrollUpdater(e) {
 		stopLive();
@@ -177,11 +164,9 @@ var threadScroller = (function() {
 	}
 
 	/**
-	 * startLiveTimer()
-	 *
 	 * start the live mode timer
 	 *
-	 * @return: n/a
+	 * @return void
 	 */
 	function startLiveTimer() {
 		stopLiveTimer();
@@ -189,11 +174,9 @@ var threadScroller = (function() {
 	}
 
 	/**
-	 * stopLiveTimer()
-	 *
 	 * stop the live mode timer
 	 *
-	 * @return: n/a
+	 * @return void
 	 */
 	function stopLiveTimer() {
 		if (timer !== null) {
@@ -203,13 +186,11 @@ var threadScroller = (function() {
 	}
 
 	/**
-	 * checkForPosts()
-	 *
 	 * send an AJAX requests to query for any posts made after
 	 * the dateline of the last currently displayed thread
 	 *
-	 * @param - event - (Event) the (possibly non-existent) click event
-	 * @return: n/a
+	 * @param Event the (possibly non-existent) click event
+	 * @return void
 	 */
 	function checkForPosts(e) {
 		// sometimes we call this directly so there is no event in progress
@@ -238,8 +219,8 @@ var threadScroller = (function() {
 	 * handles the server response and either inserts the newly loaded
 	 * posts, or flags the threads as ended (EOT)
 	 *
-	 * @param - transport - (Object) the response object
-	 * @return: n/a
+	 * @param Object response
+	 * @return void
 	 */
 	function loadPosts(data) {
 		var pidArray, postCount, fromPage, lastPid;
@@ -290,12 +271,10 @@ var threadScroller = (function() {
 	}
 
 	/**
-	 * endOfThread()
-	 *
 	 * determine whether to end or (if in live mode)
 	 * start a timer to check for new posts
 	 *
-	 * @return: n/a
+	 * @return void
 	 */
 	function endOfThread() {
 		showLink.hide();
@@ -308,13 +287,11 @@ var threadScroller = (function() {
 	}
 
 	/**
-	 * setup()
-	 *
 	 * for external set up
 	 *
-	 * @param - adminOptions - (Object)
-	 * @param - language - (Object)
-	 * @return: n/a
+	 * @param Object options
+	 * @param Object local language
+	 * @return void
 	 */
 	function setup(adminOptions, language) {
 		$.extend(options, adminOptions || {});
@@ -322,11 +299,9 @@ var threadScroller = (function() {
 	}
 
 	/**
-	 * checkRequired()
-	 *
 	 * ensure all necessary data is present
 	 *
-	 * @return: (Boolean) true for all good, false if not
+	 * @return Boolean true for all good, false if not
 	 */
 	function checkRequired() {
 		var i, requiredOptions = ['tid', 'fid', 'lastPid', 'lastPostDate'];
@@ -343,19 +318,20 @@ var threadScroller = (function() {
 			return false;
 		}
 
-		if (!$('#scrollon') || !$('#scrollon_no_posts') || !$('#scrollon_spinner')) {
+		if (!$('#scrollon') ||
+			!$('#scrollon_no_posts') ||
+			!$('#scrollon_spinner')) {
 			return false;
 		}
 		return true;
 	}
 
 	/**
-	 * getScriptByFileName()
-	 *
 	 * retrieve a HTMLScriptElement by its src attribute's base filename
 	 *
-	 * @param - fileName - (String) the unqualified script file name
-	 * @return: on success, the element (Object), on fail (Boolean) false
+	 * @param String the unqualified script file name
+	 * @return mixed on success, Object the element,
+					 on fail (Boolean) false
 	 */
 	function getScriptByFileName(fileName) {
 		var returnElement = false;
@@ -368,25 +344,24 @@ var threadScroller = (function() {
 	}
 
 	/**
-	 * loadParams()
-	 *
 	 * get the script parameters as passed in the tag src
 	 *
-	 * @return: n/a
+	 * @return void
 	 */
 	function loadParams() {
 		var paramParts, params, param, p,
 		script = getScriptByFileName('scrollon_thread.js');
 
 		// can't find our script
-		if (!script || !script.src) {
+		if (!script ||
+			!script.src) {
 			return;
 		}
 
 		// split the src into pieces
 		params = script.src.split('/');
 		if (params.length < 1) {
-			// should never happen as browser's tend to autofill http://blah to
+			// should never happen as browsers tend to autofill http://blah to
 			// unqualified src attributes
 			return;
 		}
@@ -424,18 +399,17 @@ var threadScroller = (function() {
 	 *
 	 * detect whether the element (EOT marker) is in view
 	 *
-	 * @return: n/a
+	 * @return Boolean
 	 */
 	function elementInView() {
-		return  ((container.get(0).getBoundingClientRect().top + container.get(0).offsetHeight) < getPageSize()[3]);
+		return ((container.get(0).getBoundingClientRect().top +
+				container.get(0).offsetHeight) < getPageSize()[3]);
 	}
 
 	/**
-	 * scrollToPost()
-	 *
 	 * scroll to a specified post
 	 *
-	 * @return: n/a
+	 * @return void
 	 */
 	function scrollToPost(pid) {
 		if ($('#post_' + pid)) {
@@ -444,13 +418,11 @@ var threadScroller = (function() {
 	}
 
 	/**
-	 * getFormInput()
-	 *
 	 * retrieve an input from a specific form by name
 	 *
-	 * @param - form - (String) the id of the form
-	 * @param - name - (String) the name attribute
-	 * @return: on success the HTMLInputElement Object on fail an empty object
+	 * @param  String the id of the form
+	 * @param  String the name attribute
+	 * @return on success the HTMLInputElement Object on fail an empty object
 	 */
 	function getFormInput(form, name) {
 		var retInput;
@@ -461,7 +433,7 @@ var threadScroller = (function() {
 				return;
 			}
 		});
-		
+
 		return $(retInput);
 	}
 
@@ -472,10 +444,11 @@ var threadScroller = (function() {
 	 * ...and now added back for this plugin
 	 */
 	function getPageSize() {
-		var xScroll, 
+		var xScroll,
 			yScroll;
 
-		if (window.innerHeight && window.scrollMaxY) {
+		if (window.innerHeight &&
+			window.scrollMaxY) {
 			xScroll = document.body.scrollWidth;
 			yScroll = window.innerHeight + window.scrollMaxY;
 		// All but Explorer Mac
@@ -519,11 +492,13 @@ var threadScroller = (function() {
 		} else {
 			pageWidth = xScroll;
 		}
-		
+
 		var arrayPageSize = new Array(pageWidth, pageHeight, windowWidth, windowHeight);
 
 		return arrayPageSize;
 	}
+
+	$(init);
 
 	// now build the object with only the public methods and properties
 	return {
@@ -533,5 +508,4 @@ var threadScroller = (function() {
 		init: init,
 		setup: setup
 	};
-})();
-$(document).ready(threadScroller.init);
+})(jQuery);

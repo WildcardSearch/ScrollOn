@@ -91,7 +91,7 @@ function scrollon_showthread_end()
 
 	// set up the client-side
 	$headerinclude .= <<<EOF
-	<script type="text/javascript" src="jscripts/scrollon_thread.js?version=100"></script>
+	<script type="text/javascript" src="jscripts/scrollon/thread.js?version=100"></script>
 	<script type="text/javascript">
 	<!--
 		threadScroller.setup({
