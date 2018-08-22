@@ -18,7 +18,6 @@ $settings = array(
 		),
 		"settings" => array(
 			"scrollon_posts_per" => array(
-				"sid" => "NULL",
 				"name" => 'scrollon_posts_per',
 				"title" => $lang->scrollon_posts_per_title,
 				"description" => $lang->scrollon_posts_per_desc,
@@ -27,7 +26,6 @@ $settings = array(
 				"disporder" => '10'
 			),
 			"scrollon_auto" => array(
-				"sid" => "NULL",
 				"name" => 'scrollon_auto',
 				"title" => $lang->scrollon_auto_title,
 				"description" => $lang->scrollon_auto_desc,
@@ -36,7 +34,6 @@ $settings = array(
 				"disporder" => '20'
 			),
 			"scrollon_live" => array(
-				"sid" => "NULL",
 				"name" => 'scrollon_live',
 				"title" => $lang->scrollon_live_title,
 				"description" => $lang->scrollon_live_desc,
@@ -45,7 +42,6 @@ $settings = array(
 				"disporder" => '30'
 			),
 			"scrollon_refresh_rate" => array(
-				"sid" => "NULL",
 				"name" => 'scrollon_refresh_rate',
 				"title" => $lang->scrollon_refresh_rate_title,
 				"description" => $lang->scrollon_refresh_rate_desc,
@@ -54,7 +50,6 @@ $settings = array(
 				"disporder" => '40'
 			),
 			"scrollon_refresh_decay" => array(
-				"sid" => "NULL",
 				"name" => 'scrollon_refresh_decay',
 				"title" => $lang->scrollon_refresh_decay_title,
 				"description" => $lang->scrollon_refresh_decay_desc,
@@ -63,7 +58,6 @@ $settings = array(
 				"disporder" => '50'
 			),
 			"scrollon_thread_allow_list" => array(
-				"sid" => "NULL",
 				"name" => 'scrollon_thread_allow_list',
 				"title" => $lang->scrollon_thread_allow_list_title,
 				"description" => $lang->scrollon_thread_allow_list_desc,
@@ -72,7 +66,6 @@ $settings = array(
 				"disporder" => '60'
 			),
 			"scrollon_forum_allow_list" => array(
-				"sid" => "NULL",
 				"name" => 'scrollon_forum_allow_list',
 				"title" => $lang->scrollon_forum_allow_list_title,
 				"description" => $lang->scrollon_forum_allow_list_desc,
@@ -81,7 +74,6 @@ $settings = array(
 				"disporder" => '70'
 			),
 			"scrollon_thread_deny_list" => array(
-				"sid" => "NULL",
 				"name" => 'scrollon_thread_deny_list',
 				"title" => $lang->scrollon_thread_deny_list_title,
 				"description" => $lang->scrollon_thread_deny_list_desc,
@@ -90,7 +82,6 @@ $settings = array(
 				"disporder" => '80'
 			),
 			"scrollon_forum_deny_list" => array(
-				"sid" => "NULL",
 				"name" => 'scrollon_forum_deny_list',
 				"title" => $lang->scrollon_forum_deny_list_title,
 				"description" => $lang->scrollon_forum_deny_list_desc,
