@@ -4,7 +4,7 @@
  * plugin specific extension
  */
 
-class ScrollOnInstaller extends WildcardPluginInstaller010202
+class ScrollOnInstaller extends WildcardPluginInstaller010301
 {
 	static public function getInstance()
 	{

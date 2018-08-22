@@ -123,10 +123,12 @@ EOF
 	),
 );
 
-$style_sheets = array(
-	"scrollon" => array(
-		"attachedto" => 'showthread.php',
-		"stylesheet" => <<<EOF
+$styleSheets = array(
+	'folder' => 'scrollon',
+	'forum' => array(
+		'scrollon' => array(
+			"attachedto" => 'showthread.php',
+			"stylesheet" => <<<EOF
 #scrollon {
 	width: 225px;
 	margin: 20px auto;
@@ -157,6 +159,7 @@ $style_sheets = array(
 }
 
 EOF
+		),
 	),
 );
 
