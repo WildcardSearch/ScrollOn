@@ -1,4 +1,4 @@
-## ScrollOn 0.0.3 BETA
+## ScrollOn 0.0.4 ALPHA
 For MyBB 1.8.x
 
 a plugin for MyBB forum that adds AJAX power to the thread view
@@ -9,4 +9,4 @@ a plugin for MyBB forum that adds AJAX power to the thread view
 * Optionally continue to look for new posts (on a configurable timer) when user's are at the end of the thread
 * Control which forums can and cannot use ScrollOn
 
-THIS IS A BETA VERSION NOT YET READY FOR LIVE FORUMS
+**This is an ALPHA version that is not yet ready for live forums.**
