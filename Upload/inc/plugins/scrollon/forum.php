@@ -8,20 +8,18 @@
  */
 
 // only add the necessary hooks and templates
-scrollon_initialize();
+scrollonInitialize();
 
-/*
- * scrollon_showthread_end()
- *
+/**
  * check settings and display ScrollOn if applicable
  *
- * @return: n/a
+ * @return void
  */
-function scrollon_showthread_end()
+function scrollonStart()
 {
 	global $fid, $tid;
 
-	if (!scrollon_permissions_check($fid, $tid)) {
+	if (!scrollonPermissionsCheck($fid, $tid)) {
 		// this forum cannot use ScrollOn per settings
 		return;
 	}
@@ -34,27 +32,30 @@ function scrollon_showthread_end()
 	}
 
 	// grab the list of pids displayed on this page
-	$pid_list = str_replace("'", '', substr($pids, 8, strlen($pids) - 9));
+	$pidList = str_replace("'", '', substr($pids, 8, strlen($pids) - 9));
 
 	// grab the last pid from the list
-	$pid_array = explode(",", $pid_list);
-	$pid = (int) $pid_array[count($pid_array) - 1];
+	$pidArray = explode(',', $pidList);
+	$pid = (int) $pidArray[count($pidArray) - 1];
 
 	// and then grab its dateline
-	$query = $db->simple_select('posts', 'dateline', "pid='{$pid}'", array("limit" => 1));
+	$query = $db->simple_select('posts', 'dateline', "pid='{$pid}'", array('limit' => 1));
 	if ($db->num_rows($query) == 0) {
 		// something went wrong
 		return;
 	}
 	$dateline = (int) $db->fetch_field($query, 'dateline');
 
+	// set version code
+	$version = SCROLLON_VERSION_CODE;
+
 	// get the posts per page setting from somewhere
 	$ppp = 20;
-	$default_ppp = (int) $mybb->settings['postsperpage'];
+	$defaultPpp = (int) $mybb->settings['postsperpage'];
 	if ((int) $mybb->settings['scrollon_posts_per'] > 0) {
 		$ppp = (int) $mybb->settings['scrollon_posts_per'];
 	} elseif((int) $mybb->settings['postsperpage'] > 0) {
-		$ppp = $default_ppp;
+		$ppp = $defaultPpp;
 	}
 
 	$auto = 'false';
@@ -67,31 +68,31 @@ function scrollon_showthread_end()
 		$live = 'true';
 	}
 
-	$refresh_rate = 30;
+	$refreshRate = 30;
 	if ((int) $mybb->settings['scrollon_refresh_rate'] > 0) {
-		$refresh_rate = (int) $mybb->settings['scrollon_refresh_rate'];
+		$refreshRate = (int) $mybb->settings['scrollon_refresh_rate'];
 	}
 
-	$refresh_decay = 1.1;
+	$refreshDecay = 1.1;
 	if ($mybb->settings['scrollon_refresh_decay'] >= 1) {
-		$refresh_decay = (float) $mybb->settings['scrollon_refresh_decay'];
+		$refreshDecay = (float) $mybb->settings['scrollon_refresh_decay'];
 	}
 
 	// show no posts if we are at the end of the thread
-	$no_post_style = ' style="display: none;"';
-	if (count($pid_array) < $ppp ||
+	$noPostStyle = ' style="display: none;"';
+	if (count($pidArray) < $ppp ||
 		$page == $pages) {
-		$no_post_style = $show_more = '';
+		$noPostStyle = $showMore = '';
 	} else {
 		// this link will be used if auto is off but will be removed by JS otherwise
-		$next_page = get_thread_link($tid, $page + 1);
-		eval("\$show_more = \"" . $templates->get('scrollon_show_link') . "\";");
+		$nextPage = get_thread_link($tid, $page + 1);
+		eval("\$showMore = \"{$templates->get('scrollon_show_link')}\";");
 	}
-	eval("\$scrollon = \"" . $templates->get('scrollon') . "\";");
+	eval("\$scrollon = \"{$templates->get('scrollon')}\";");
 
 	// set up the client-side
 	$headerinclude .= <<<EOF
-	<script type="text/javascript" src="jscripts/scrollon_thread.js?version=100"></script>
+	<script type="text/javascript" src="jscripts/scrollon/thread.js?version={$version}"></script>
 	<script type="text/javascript">
 	<!--
 		threadScroller.setup({
@@ -100,12 +101,12 @@ function scrollon_showthread_end()
 			lastPid: {$pid},
 			lastPostDate: {$dateline},
 			postCounter: {$postcounter},
-			defaultPostsPer: {$default_ppp},
+			defaultPostsPer: {$defaultPpp},
 			postsPer: {$ppp},
 			auto: {$auto},
 			live: {$live},
-			refreshTime: {$refresh_rate},
-			refreshDecay: {$refresh_decay}
+			refreshTime: {$refreshRate},
+			refreshDecay: {$refreshDecay}
 		}, {
 			showMore: '{$lang->scrollon_more}'
 		});
@@ -114,14 +115,12 @@ function scrollon_showthread_end()
 EOF;
 }
 
-/*
- * scrollon_xmlhttp()
- *
+/**
  * the AJAX post loading server-side functionality
  *
- * @return: n/a
+ * @return void
  */
-function scrollon_xmlhttp()
+function scrollonXmlhttp()
 {
 	global $mybb;
 
@@ -135,7 +134,7 @@ function scrollon_xmlhttp()
 
 	$fid = (int) $mybb->input['fid'];
 	$tid = (int) $mybb->input['tid'];
-	$last_post_date = (int) $mybb->input['lastPostDate'];
+	$lastPostDate = (int) $mybb->input['lastPostDate'];
 	$postcounter = (int) $mybb->input['postCounter'];
 
 	$ismod = is_moderator($fid);
@@ -153,8 +152,8 @@ function scrollon_xmlhttp()
 	}
 
 	// get the posts made since last check (or since page load)
-	$query_where = "tid='{$tid}' AND dateline > {$last_post_date}{$visible}";
-	$query = $db->simple_select('posts', 'pid', $query_where, array("order_by" => 'dateline', "order_dir" => 'ASC', "limit" => $ppp));
+	$where = "tid='{$tid}' AND dateline > {$lastPostDate}{$visible}";
+	$query = $db->simple_select('posts', 'pid', $where, array('order_by' => 'dateline', 'order_dir' => 'ASC', 'limit' => $ppp));
 	if ($db->num_rows($query) == 0) {
 		// no posts, just exit with no output to trigger EOT for client-side
 		exit;
@@ -168,7 +167,6 @@ function scrollon_xmlhttp()
 		$pids .= "{$sep}{$pid}";
 		$sep = ',';
 	}
-	$where = "pid IN({$pids})";
 
 	// now actually query for the posts
 	$posts = '';
@@ -178,7 +176,7 @@ function scrollon_xmlhttp()
 		LEFT JOIN {$db->table_prefix}users u ON (u.uid=p.uid)
 		LEFT JOIN {$db->table_prefix}userfields f ON (f.ufid=u.uid)
 		LEFT JOIN {$db->table_prefix}users eu ON (eu.uid=p.edituid)
-		WHERE {$where}
+		WHERE pid IN({$pids})
 		ORDER BY p.dateline
 	");
 
@@ -188,7 +186,7 @@ function scrollon_xmlhttp()
 	$thread = get_thread($tid);
 	$ignored_users = array();
 	if ($mybb->user['uid'] > 0 &&
-		$mybb->user['ignorelist'] != "") {
+		$mybb->user['ignorelist'] != '') {
 		$ignore_list = explode(',', $mybb->user['ignorelist']);
 		foreach ($ignore_list as $uid) {
 			$ignored_users[$uid] = 1;
@@ -202,15 +200,14 @@ function scrollon_xmlhttp()
 			$post['visible'] = 0;
 		}
 		$posts .= build_postbit($post);
-		$last_dateline = (int) $post['dateline'];
-		$post = '';
+		$lastPost = $post;
 	}
 
 	$info = json_encode(array(
-		"lastPostDate" => $last_dateline,
-		"posts" => $posts,
-		"postCounter" => $postcounter,
-		"pids" => $pids
+		'lastPostDate' => (int) $lastPost['dateline'],
+		'posts' => $posts,
+		'postCounter' => $postcounter,
+		'pids' => $pids
 	));
 
 	// send all the info back to the client
@@ -219,44 +216,40 @@ function scrollon_xmlhttp()
 	exit;
 }
 
-/*
- * scrollon_initialize()
- *
+/**
  * add the appropriate hooks and caches any templates that will be used
  *
- * @return: n/a
+ * @return void
  */
-function scrollon_initialize()
+function scrollonInitialize()
 {
 	global $mybb, $plugins, $templatelist;
 
 	switch (THIS_SCRIPT) {
 	case 'showthread.php':
-		$plugins->add_hook('showthread_end', 'scrollon_showthread_end');
+		$plugins->add_hook('showthread_end', 'scrollonStart');
 		$templatelist .= ',scrollon';
 		break;
 	case 'xmlhttp.php':
 		if ($mybb->input['action'] == 'scrollon') {
-			$plugins->add_hook('xmlhttp', 'scrollon_xmlhttp');
+			$plugins->add_hook('xmlhttp', 'scrollonXmlhttp');
 		}
 		break;
 	}
 }
 
-/*
- * scrollon_permissions_check()
- *
+/**
  * allow/disallow usage based on admin settings
  *
- * @param - $fid - (int) the forum id
- * @param - $tid - (int) the thread id
- * @return: (bool) true if allowed, false if not
+ * @param  int the forum id
+ * @param  int the thread id
+ * @return bool true if allowed, false if not
  */
-function scrollon_permissions_check($fid, $tid)
+function scrollonPermissionsCheck($fid, $tid)
 {
 	global $mybb;
 
-	foreach (array("fid" => 'forum', "tid" => 'thread') as $id => $item) {
+	foreach (array('fid' => 'forum', 'tid' => 'thread') as $id => $item) {
 		foreach (array('allow', 'deny') as $key) {
 			$variable = "{$item}_{$key}_list";
 			$$variable = (array) explode(',', trim($mybb->settings["scrollon_{$variable}"]));
