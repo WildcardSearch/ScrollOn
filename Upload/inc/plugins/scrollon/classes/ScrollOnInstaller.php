@@ -11,20 +11,9 @@ class ScrollOnInstaller extends WildcardPluginInstaller010301
 		static $instance;
 
 		if (!isset($instance)) {
-			$instance = new ScrollOnInstaller();
+			$instance = new ScrollOnInstaller(MYBB_ROOT . 'inc/plugins/scrollon/install_data.php');
 		}
 		return $instance;
-	}
-
-	/**
-	 * link the installer to our data file
-	 *
-	 * @param  string path to the install data
-	 * @return void
-	 */
-	public function __construct($path = '')
-	{
-		parent::__construct(MYBB_ROOT . 'inc/plugins/scrollon/install_data.php');
 	}
 }
 

@@ -7,12 +7,11 @@
  */
 
 var threadScroller = (function($) {
-	var container = {},
-	noPosts = {},
-	spinner = {},
-	showLink,
-	qrLastPid = {},
-	qrFromPage = {},
+	var $container = {},
+	$spinner = {},
+	$showLink,
+	$qrLastPid = {},
+	$qrFromPage = {},
 
 	// data objects
 	options = {
@@ -23,8 +22,9 @@ var threadScroller = (function($) {
 		liveRate: 30,
 		liveDecay: 1.1
 	},
+
 	lang = {
-		showMore: 'Show More Posts'
+		showMore: "Show More Posts"
 	},
 
 	timer = null,
@@ -42,51 +42,50 @@ var threadScroller = (function($) {
 		}
 
 		// remove pagination
-		$('div.pagination').each(function() {
+		$("div.pagination").each(function() {
 			this.remove();
 		});
 
 		// set up the elements
-		container = $('#scrollon');
-		noPosts = $('#scrollon_no_posts');
-		spinner = $('#scrollon_spinner');
-		container.show();
+		$container = $("#scrollon");
+		$spinner = $("#scrollonSpinner");
+		$container.show();
 
-		if ($('scrollon_show_link')) {
-			showLink = $('#scrollon_show_link');
+		if ($("scrollonShowLink")) {
+			$showLink = $("#scrollonShowLink");
 		}
 
-		if ($('#lastpid')) {
-			qrLastPid = $('#lastpid');
+		if ($("#lastpid")) {
+			$qrLastPid = $("#lastpid");
 		} else {
-			qrLastPid = getFormInput('quick_reply_form', 'lastpid');
+			$qrLastPid = getFormInput("quick_reply_form", "lastpid");
 		}
 
-		if (qrLastPid.next('input') &&
-			qrLastPid.next('input').prop('name') === 'from_page') {
-			qrFromPage = qrLastPid.next('input');
+		if ($qrLastPid.next("input") &&
+			$qrLastPid.next("input").prop("name") === "from_page") {
+			$qrFromPage = $qrLastPid.next("input");
 		} else {
-			qrFromPage = getFormInput('quick_reply_form', 'from_page');
+			$qrFromPage = getFormInput("quick_reply_form", "from_page");
 		}
 
 		// default mode
 		if (options.auto === false) {
-			if (typeof showLink !== 'undefined') {
-				showLink.click(checkForPosts);
+			if (typeof $showLink !== "undefined") {
+				$showLink.click(checkForPosts);
 			}
 			return;
 		}
 
 		// auto doesn't need a link
-		if (typeof showLink !== 'undefined') {
-			showLink.remove();
+		if (typeof $showLink !== "undefined") {
+			$showLink.remove();
 		}
-		showLink = container.children('span:first');
-		showLink.html(lang.showMore);
+		$showLink = $container.children("span:first");
+		$showLink.html(lang.showMore);
 		startAuto();
 
 		if (elementInView()) {
-			showLink.hide();
+			$showLink.hide();
 		}
 	}
 
@@ -105,7 +104,7 @@ var threadScroller = (function($) {
 	 * @return void
 	 */
 	function stopAuto() {
-		$(window).unbind('scroll', checkScroll);
+		$(window).unbind("scroll", checkScroll);
 	}
 
 	/**
@@ -139,7 +138,7 @@ var threadScroller = (function($) {
 	 * @return void
 	 */
 	function stopLive() {
-		$(window).unbind('scroll', checkScrollUpdater);
+		$(window).unbind("scroll", checkScrollUpdater);
 	}
 
 	/**
@@ -189,18 +188,18 @@ var threadScroller = (function($) {
 	 */
 	function checkForPosts(e) {
 		// sometimes we call this directly so there is no event in progress
-		if (typeof e !== 'undefined') {
+		if (typeof e !== "undefined") {
 			e.preventDefault();
 		}
 
 		stopLiveTimer();
-		spinner.show();
+		$spinner.show();
 
 		$.ajax({
-			type: 'post',
-			url: 'xmlhttp.php',
+			type: "post",
+			url: "xmlhttp.php",
 			data: {
-				action: 'scrollon',
+				action: "scrollon",
 				tid: options.tid,
 				fid: options.fid,
 				lastPostDate: options.lastPostDate,
@@ -229,7 +228,7 @@ var threadScroller = (function($) {
 			// if we found posts, reset the rate to the initial value
 			refreshRate = options.liveRate;
 
-			pidArray = data.pids.split(',');
+			pidArray = data.pids.split(",");
 			postCount = pidArray.length;
 
 			options.lastPostDate = data.lastPostDate;
@@ -240,12 +239,12 @@ var threadScroller = (function($) {
 			if (data.postCounter % options.defaultPostsPer == 0) {
 				fromPage += 1;
 			}
-			qrFromPage.value = fromPage;
+			$qrFromPage.val(fromPage);
 
 			// insert the posts
-			$('#posts').append(data.posts);
+			$("#posts").append(data.posts);
 
-			// if we got a 'page full'
+			// if we got a "page full"
 			if (postCount == options.postsPer) {
 				if (options.auto) {
 					startAuto();
@@ -259,10 +258,10 @@ var threadScroller = (function($) {
 				lastPid = pidArray[postCount - 1];
 				scrollToPost(options.lastPid);
 				options.lastPid = lastPid;
-				qrLastPid.value = lastPid;
+				$qrLastPid.val(lastPid);
 			}
 		}
-		spinner.hide();
+		$spinner.hide();
 	}
 
 	/**
@@ -272,8 +271,8 @@ var threadScroller = (function($) {
 	 * @return void
 	 */
 	function endOfThread() {
-		showLink.hide();
-		noPosts.show();
+		$showLink.hide();
+		$("#scrollonNoPosts").show();
 
 		if (options.live) {
 			startLiveTimer();
@@ -299,18 +298,18 @@ var threadScroller = (function($) {
 	 * @return Boolean true for all good, false if not
 	 */
 	function checkRequired() {
-		var i, requiredOptions = ['tid', 'fid', 'lastPid', 'lastPostDate'];
+		var i, requiredOptions = ["tid", "fid", "lastPid", "lastPostDate"];
 
 		for (i = 0; i < requiredOptions.length; i++) {
-			if (typeof options[requiredOptions[i]] === 'undefined' ||
+			if (typeof options[requiredOptions[i]] === "undefined" ||
 			    parseInt(options[requiredOptions[i]]) === 0) {
 				return false;
 			}
 		}
 
-		if (!$('#scrollon') ||
-			!$('#scrollon_no_posts') ||
-			!$('#scrollon_spinner')) {
+		if (!$("#scrollon") ||
+			!$("#scrollonNoPosts") ||
+			!$("#scrollonSpinner")) {
 			return false;
 		}
 		return true;
@@ -324,8 +323,8 @@ var threadScroller = (function($) {
 	 * @return Boolean
 	 */
 	function elementInView() {
-		return ((container.get(0).getBoundingClientRect().top +
-				container.get(0).offsetHeight) < $(window).height());
+		return (($container.get(0).getBoundingClientRect().top +
+				$container.get(0).offsetHeight) < $(window).height());
 	}
 
 	/**
@@ -334,8 +333,8 @@ var threadScroller = (function($) {
 	 * @return void
 	 */
 	function scrollToPost(pid) {
-		if ($('#post_' + pid)) {
-			$('#post_' + pid).get(0).scrollIntoView();
+		if ($("#post_" + pid)) {
+			$("#post_" + pid).get(0).scrollIntoView();
 		}
 	}
 
@@ -349,8 +348,8 @@ var threadScroller = (function($) {
 	function getFormInput(form, name) {
 		var retInput;
 
-		$('#' + form + ' input').each(function(k, input) {
-			if (input && input.getAttribute('name') === name) {
+		$("#" + form + " input").each(function(k, input) {
+			if (input && input.getAttribute("name") === name) {
 				retInput = input;
 				return;
 			}
