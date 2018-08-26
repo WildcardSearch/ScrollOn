@@ -115,7 +115,8 @@ function scrollon_install()
 function scrollon_activate()
 {
 	require_once MYBB_ROOT . '/inc/adminfunctions_templates.php';
-	find_replace_templatesets('showthread', '#' . preg_quote('{$quickreply}') . '#i', '{$scrollon}{$quickreply}');
+	find_replace_templatesets('showthread', '#' . preg_quote('{$header}') . '#i', '{$header}{$scrollonTop}');
+	find_replace_templatesets('showthread', '#' . preg_quote('{$quickreply}') . '#i', '{$scrollonBottom}{$quickreply}');
 
 	// if we just upgraded . . .
 	$oldVersion = scrollonGetCacheVersion();
@@ -139,7 +140,8 @@ function scrollon_activate()
 function scrollon_deactivate()
 {
 	require_once MYBB_ROOT . '/inc/adminfunctions_templates.php';
-	find_replace_templatesets('showthread', '#' . preg_quote('{$scrollon}') . '#i', '');
+	find_replace_templatesets('showthread', '#' . preg_quote('{$scrollonTop}') . '#i', '');
+	find_replace_templatesets('showthread', '#' . preg_quote('{$scrollonBottom}') . '#i', '');
 }
 
 /**

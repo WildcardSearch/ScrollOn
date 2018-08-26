@@ -100,15 +100,22 @@ $templates = array(
 			'title' => $lang->scrollon,
 		),
 		'templates' => array(
-			'scrollon' => <<<EOF
-	<div id="scrollon" style="display: none;">
-		<span>{\$showMore}</span><span id="scrollonNoPosts"{\$noPostStyle}>{\$lang->scrollon_no_new_posts}</span><span id="scrollonSpinner" style="display: none;"><img src="{\$theme['imgdir']}/scrollon/spinner.gif" alt="{\$lang->scrollon_loading}"/></span>
+			'scrollon_top' => <<<EOF
+	<div id="scrollonTop" style="display: none;">
+		<span>{\$showMore}</span><span id="scrollonSpinnerTop" style="display: none;"><img src="{\$theme['imgdir']}/scrollon/spinner.gif" alt="{\$lang->scrollon_loading}"/></span>
+	</div>
+
+EOF
+			,
+			'scrollon_bottom' => <<<EOF
+	<div id="scrollonBottom" style="display: none;">
+		<span>{\$showMore}</span><span id="scrollonNoPosts"{\$noPostStyle}>{\$lang->scrollon_no_new_posts}</span><span id="scrollonSpinnerBottom" style="display: none;"><img src="{\$theme['imgdir']}/scrollon/spinner.gif" alt="{\$lang->scrollon_loading}"/></span>
 	</div>
 
 EOF
 			,
 			'scrollon_show_link' => <<<EOF
-<a id="scrollonShowLink" href="{\$nextPage}">{\$lang->scrollon_more}</a>
+<a id="{\$linkId}" href="{\$pageLink}">{\$lang->scrollon_more}</a>
 EOF
 		),
 	),
@@ -120,7 +127,7 @@ $styleSheets = array(
 		'scrollon' => array(
 			'attachedto' => 'showthread.php',
 			'stylesheet' => <<<EOF
-#scrollon {
+#scrollonTop, #scrollonBottom {
 	width: 225px;
 	margin: 20px auto;
 	border: 2px outset black;
@@ -132,20 +139,20 @@ $styleSheets = array(
 	font-size: 1.2em;
 }
 
-#scrollon a {
+#scrollonTop a, #scrollonBottom a {
 	text-decoration: none;
 }
 
-#scrollon_spinner {
+#scrollonSpinnerTop, #scrollonSpinnerBottom {
 	float: right;
 }
 
-#scrollon_no_posts {
+#scrollonNoPosts {
 	color: grey;
 	font-style: italic;
 }
 
-#scrollon_show_link {
+#scrollonShowLinkTop, #scrollonShowLinkBottom {
 	font-weight: bold;
 }
 

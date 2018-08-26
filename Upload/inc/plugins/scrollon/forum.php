@@ -24,8 +24,8 @@ function scrollonStart()
 		return;
 	}
 
-	global $page, $pages, $mybb, $templates, $db, $lang;
-	global $pids, $headerinclude, $postcounter, $scrollon;
+	global $mybb, $db, $lang, $templates, $page, $pages, $pids;
+	global $headerinclude, $postcounter, $scrollonTop, $scrollonBottom;
 
 	if (!$lang->scrollon) {
 		$lang->load('scrollon');
@@ -34,17 +34,12 @@ function scrollonStart()
 	// grab the list of pids displayed on this page
 	$pidList = str_replace("'", '', substr($pids, 8, strlen($pids) - 9));
 
-	// grab the last pid from the list
+	// grab the first and last pid from the list
 	$pidArray = explode(',', $pidList);
-	$pid = (int) $pidArray[count($pidArray) - 1];
-
-	// and then grab its dateline
-	$query = $db->simple_select('posts', 'dateline', "pid='{$pid}'", array('limit' => 1));
-	if ($db->num_rows($query) == 0) {
-		// something went wrong
-		return;
-	}
-	$dateline = (int) $db->fetch_field($query, 'dateline');
+	$totalPosts = count($pidArray);
+	$postCounterFirst = $postcounter - ($totalPosts - 1);
+	$firstPid = $pidArray[0];
+	$lastPid = (int) $pidArray[$totalPosts - 1];
 
 	// set version code
 	$version = SCROLLON_VERSION_CODE;
@@ -54,7 +49,7 @@ function scrollonStart()
 	$defaultPpp = (int) $mybb->settings['postsperpage'];
 	if ((int) $mybb->settings['scrollon_posts_per'] > 0) {
 		$ppp = (int) $mybb->settings['scrollon_posts_per'];
-	} elseif((int) $mybb->settings['postsperpage'] > 0) {
+	} elseif($defaultPpp > 0) {
 		$ppp = $defaultPpp;
 	}
 
@@ -62,6 +57,7 @@ function scrollonStart()
 	if ($mybb->settings['scrollon_auto']) {
 		$auto = 'true';
 	}
+
 	$live = 'false';
 	if ($mybb->settings['scrollon_live'] &&
 		(int) $mybb->settings['scrollon_refresh_rate'] > 0) {
@@ -78,17 +74,30 @@ function scrollonStart()
 		$refreshDecay = (float) $mybb->settings['scrollon_refresh_decay'];
 	}
 
+	$startOfThread = 'true';
+	if ($page > 1) {
+		$startOfThread = 'false';
+		$linkId = 'scrollonShowLinkTop';
+		$pageLink = get_thread_link($tid, $page - 1);
+		eval("\$showMore = \"{$templates->get('scrollon_show_link')}\";");
+		eval("\$scrollonTop = \"{$templates->get('scrollon_top')}\";");
+	}
+
 	// show no posts if we are at the end of the thread
 	$noPostStyle = ' style="display: none;"';
-	if (count($pidArray) < $ppp ||
+	$showMore = '';
+	$endOfThread = 'false';
+	if ($totalPosts < $ppp ||
 		$page == $pages) {
-		$noPostStyle = $showMore = '';
+		$noPostStyle = '';
+		$endOfThread = 'true';
 	} else {
 		// this link will be used if auto is off but will be removed by JS otherwise
-		$nextPage = get_thread_link($tid, $page + 1);
+		$linkId = 'scrollonShowLinkBottom';
+		$pageLink = get_thread_link($tid, $page + 1);
 		eval("\$showMore = \"{$templates->get('scrollon_show_link')}\";");
 	}
-	eval("\$scrollon = \"{$templates->get('scrollon')}\";");
+	eval("\$scrollonBottom = \"{$templates->get('scrollon_bottom')}\";");
 
 	// set up the client-side
 	$headerinclude .= <<<EOF
@@ -98,9 +107,12 @@ function scrollonStart()
 		threadScroller.setup({
 			tid: {$tid},
 			fid: {$fid},
-			lastPid: {$pid},
-			lastPostDate: {$dateline},
-			postCounter: {$postcounter},
+			firstPid: {$firstPid},
+			lastPid: {$lastPid},
+			postCounterFirst: {$postCounterFirst},
+			postCounterLast: {$postcounter},
+			startOfThread: {$startOfThread},
+			endOfThread: {$endOfThread},
 			defaultPostsPer: {$defaultPpp},
 			postsPer: {$ppp},
 			auto: {$auto},
@@ -129,13 +141,18 @@ function scrollonXmlhttp()
 		return;
 	}
 
-	global $db, $postcounter, $fid, $forum, $forumpermissions;
-	global $ismod, $thread, $ignored_users, $mybb;
+	global $mybb, $db, $thread, $fid, $forum, $forumpermissions;
+	global $postcounter, $ismod, $ignored_users;
+
+	$mode = 'bottom';
+	if ($mybb->input['mode'] == 'scrollonShowLinkTop') {
+		$mode = 'top';
+	}
 
 	$fid = (int) $mybb->input['fid'];
 	$tid = (int) $mybb->input['tid'];
-	$lastPostDate = (int) $mybb->input['lastPostDate'];
-	$postcounter = (int) $mybb->input['postCounter'];
+	$firstPid = (int) $mybb->input['firstPid'];
+	$lastPid = (int) $mybb->input['lastPid'];
 
 	$ismod = is_moderator($fid);
 	$visible = " AND visible='1'";
@@ -143,29 +160,55 @@ function scrollonXmlhttp()
 		$visible = " AND (visible='0' OR visible='1')";
 	}
 
+	$ppp = 20;
 	if ((int) $mybb->settings['scrollon_posts_per'] > 0) {
 		$ppp = (int) $mybb->settings['scrollon_posts_per'];
 	} elseif((int) $mybb->settings['postsperpage'] > 0) {
 		$ppp = (int) $mybb->settings['postsperpage'];
-	} else {
-		$ppp = 20;
 	}
 
-	// get the posts made since last check (or since page load)
-	$where = "tid='{$tid}' AND dateline > {$lastPostDate}{$visible}";
-	$query = $db->simple_select('posts', 'pid', $where, array('order_by' => 'dateline', 'order_dir' => 'ASC', 'limit' => $ppp));
-	if ($db->num_rows($query) == 0) {
-		// no posts, just exit with no output to trigger EOT for client-side
+	$op = '>';
+	$pid = $lastPid;
+	$orderDir = 'ASC';
+	if ($mode == 'top') {
+		$op = '<';
+		$pid = $firstPid;
+		$orderDir = 'DESC';
+	}
+
+	$where = "tid='{$tid}' AND pid {$op} {$pid}{$visible}";
+	$query = $db->simple_select('posts', 'pid', $where, array('order_by' => 'pid', 'order_dir' => $orderDir));
+
+	$postCount = (int) min($ppp, $db->num_rows($query));
+	$allRemaining = $db->num_rows($query);
+	if ($postCount == 0) {
+		$json = json_encode(array(
+			'mode' => $mode,
+			'error' => 1,
+		));
+
+		// send all the info back to the client
+		header('Content-type: application/json');
+		echo($json);
 		exit;
+	}
+
+	$postcounter = (int) $mybb->input['postCounterLast'];
+	if ($mode == 'top') {
+		$postcounter = max(0, ($mybb->input['postCounterFirst'] - $postCount) - 1);
 	}
 
 	require_once MYBB_ROOT . 'inc/functions_post.php';
 
 	// get the pid list and build the SQL WHERE
 	$sep = $pids = '';
+	$count = 0;
 	while ($pid = $db->fetch_field($query, 'pid')) {
 		$pids .= "{$sep}{$pid}";
 		$sep = ',';
+		if (++$count >= $ppp) {
+			break;
+		}
 	}
 
 	// now actually query for the posts
@@ -177,7 +220,7 @@ function scrollonXmlhttp()
 		LEFT JOIN {$db->table_prefix}userfields f ON (f.ufid=u.uid)
 		LEFT JOIN {$db->table_prefix}users eu ON (eu.uid=p.edituid)
 		WHERE pid IN({$pids})
-		ORDER BY p.dateline
+		ORDER BY p.pid
 	");
 
 	// to build the posts, we'll need a few more things
@@ -194,25 +237,42 @@ function scrollonXmlhttp()
 	}
 
 	// build the posts
+	$firstPost = null;
 	while ($post = $db->fetch_array($query)) {
-		if ($thread['firstpost'] == $post['pid'] &&
-			$thread['visible'] == 0) {
-			$post['visible'] = 0;
+		if ($thread['firstpost'] == $post['pid']) {
+			if ($thread['visible'] == 0) {
+				$post['visible'] = 0;
+			}
 		}
+
+		if ($firstPost === null) {
+			$firstPost = $post;
+		}
+
 		$posts .= build_postbit($post);
 		$lastPost = $post;
 	}
 
-	$info = json_encode(array(
-		'lastPostDate' => (int) $lastPost['dateline'],
+	$info = array(
+		'mode' => $mode,
 		'posts' => $posts,
-		'postCounter' => $postcounter,
-		'pids' => $pids
-	));
+		'pids' => $pids,
+	);
+
+	$info['firstPid'] = (int) $firstPost['pid'];
+	$info['lastPid'] = (int) $lastPost['pid'];
+	$info['postCounterFirst'] = ($postcounter - $postCount);
+	$info['postCounterLast'] = $postcounter;
+
+	if ($allRemaining - $postCount <= 0) {
+		$info['error'] = 2;
+	}
+
+	$json = json_encode($info);
 
 	// send all the info back to the client
 	header('Content-type: application/json');
-	echo($info);
+	echo($json);
 	exit;
 }
 
